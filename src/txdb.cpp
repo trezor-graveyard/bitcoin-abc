@@ -53,7 +53,7 @@ struct CoinEntry {
 }
 
 CCoinsViewDB::CCoinsViewDB(size_t nCacheSize, bool fMemory, bool fWipe)
-    : db(GetDataDir() / "chainstate", nCacheSize, fMemory, fWipe, true) {}
+    : db(GetDataDir() / "chainstate", nCacheSize, fMemory, fWipe, true, false, 64) {}
 
 bool CCoinsViewDB::GetCoin(const COutPoint &outpoint, Coin &coin) const {
     return db.Read(CoinEntry(&outpoint), coin);
@@ -102,9 +102,9 @@ size_t CCoinsViewDB::EstimateSize() const {
     return db.EstimateSize(DB_COIN, char(DB_COIN + 1));
 }
 
-CBlockTreeDB::CBlockTreeDB(size_t nCacheSize, bool fMemory, bool fWipe)
+CBlockTreeDB::CBlockTreeDB(size_t nCacheSize, bool fMemory, bool fWipe, bool compression, int maxOpenFiles)
     : CDBWrapper(GetDataDir() / "blocks" / "index", nCacheSize, fMemory,
-                 fWipe) {}
+                 fWipe, false, compression, maxOpenFiles) {}
 
 bool CBlockTreeDB::ReadBlockFileInfo(int nFile, CBlockFileInfo &info) {
     return Read(std::make_pair(DB_BLOCK_FILES, nFile), info);
