@@ -770,7 +770,7 @@ UniValue getmempoolentry(const Config &config, const JSONRPCRequest &request) {
     return info;
 }
 
-UniValue getblockdeltas(const JSONRPCRequest& request)
+UniValue getblockdeltas(const Config &config, const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
         throw runtime_error("");
@@ -793,7 +793,7 @@ UniValue getblockdeltas(const JSONRPCRequest& request)
     return blockToDeltasJSON(block, pblockindex);
 }
 
-UniValue getblockhashes(const JSONRPCRequest& request)
+UniValue getblockhashes(const Config &config, const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() < 2)
         throw runtime_error(
@@ -1842,8 +1842,8 @@ static const CRPCCommand commands[] = {
     { "blockchain",         "getbestblockhash",       getbestblockhash,       true,  {} },
     { "blockchain",         "getblockcount",          getblockcount,          true,  {} },
     { "blockchain",         "getblock",               getblock,               true,  {"blockhash","verbose"} },
-    { "blockchain",         "getblockdeltas",         &getblockdeltas,        false, {} },
-    { "blockchain",         "getblockhashes",         &getblockhashes,        true,  {}  },
+    { "blockchain",         "getblockdeltas",         getblockdeltas,         false, {} },
+    { "blockchain",         "getblockhashes",         getblockhashes,         true,  {}  },
     { "blockchain",         "getblockhash",           getblockhash,           true,  {"height"} },
     { "blockchain",         "getblockheader",         getblockheader,         true,  {"blockhash","verbose"} },
     { "blockchain",         "getchaintips",           getchaintips,           true,  {} },
