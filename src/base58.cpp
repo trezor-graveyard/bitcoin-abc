@@ -231,6 +231,7 @@ public:
     CBitcoinAddress(const char *pszAddress) { SetString(pszAddress); }
 
     CTxDestination Get() const;
+    bool GetIndexKey(uint160& hashBytes, int& type) const;
 };
 
 class CBitcoinAddressVisitor : public boost::static_visitor<bool> {
@@ -285,6 +286,23 @@ CTxDestination CBitcoinAddress::Get() const {
     } else {
         return CNoDestination();
     }
+}
+
+bool CBitcoinAddress::GetIndexKey(uint160& hashBytes, int& type) const
+{
+    if (!IsValid()) {
+        return false;
+    } else if (vchVersion == Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS)) {
+        memcpy(&hashBytes, &vchData[0], 20);
+        type = 1;
+        return true;
+    } else if (vchVersion == Params().Base58Prefix(CChainParams::SCRIPT_ADDRESS)) {
+        memcpy(&hashBytes, &vchData[0], 20);
+        type = 2;
+        return true;
+    }
+
+    return false;
 }
 
 void CBitcoinSecret::SetKey(const CKey &vchSecret) {
