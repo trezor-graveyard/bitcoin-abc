@@ -40,8 +40,9 @@ docker run -v $BITCOINPATH:/bitcoin bitcoind_build /run.sh $2
 cd $BITCOINPATH/out
 
 # renaming from Bitcoin name to Bitcore name.... stupid thing
-rm -f $BITCOINPATH/out/bitcoin-0.14.0-x86_64-linux-gnu-debug.tar.gz
+rm -f $BITCOINPATH/out/*-linux-gnu-debug.tar.gz
 rename s/x86_64-linux-gnu/linux64/ $BITCOINPATH/out/*.tar.gz
+rename 's/out\/bitcoin/out\/bitcoin-abc/' $BITCOINPATH/out/*.tar.gz
 
 sha256sum *.tar.gz > SHA256SUMS
 gpg --digest-algo sha256 --clearsign SHA256SUMS
