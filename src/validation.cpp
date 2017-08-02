@@ -1685,6 +1685,8 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
 
         if (fAddressIndex) {
 
+            LogPrintf("XXX %s: %s: %s\n", __func__, block.GetHash().ToString(), tx.GetId().ToString());
+
             for (unsigned int k = tx.vout.size(); k-- > 0;) {
                 const CTxOut &out = tx.vout[k];
 
@@ -2107,6 +2109,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
     std::vector<std::pair<CAddressUnspentKey, CAddressUnspentValue> > addressUnspentIndex;
     std::vector<std::pair<CSpentIndexKey, CSpentIndexValue> > spentIndex;
 
+    LogPrintf("XXX %s: txs in block %s\n", __func__, block.GetHash().ToString());
     for (size_t i = 0; i < block.vtx.size(); i++) {
         const CTransaction &tx = *(block.vtx[i]);
         const uint256 txhash = tx.GetHash();
@@ -2137,9 +2140,10 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
 
             if (fAddressIndex || fSpentIndex)
             {
+                LogPrintf("XXX %s: inputs in tx %s\n", __func__, tx.GetId().ToString());
                 for (size_t j = 0; j < tx.vin.size(); j++) {
-
                     const CTxIn input = tx.vin[j];
+                    LogPrintf("XXX %s: input %s\n", __func__, input.ToString());
                     const CTxOut &prevout = view.GetOutputFor(tx.vin[j]);
                     uint160 hashBytes;
                     int addressType;
@@ -2154,6 +2158,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
                         hashBytes.SetNull();
                         addressType = 0;
                     }
+                    LogPrintf("XXX %s: input %s, addr_type %d, hash %s\n", __func__, input.ToString(), addressType, hashBytes.ToString());
 
                     if (fAddressIndex && addressType > 0) {
                         // record spending activity
@@ -2205,10 +2210,13 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         }
 
         if (fAddressIndex) {
+            LogPrintf("XXX %s: outputs in tx %s\n", __func__, tx.GetId().ToString());
             for (unsigned int k = 0; k < tx.vout.size(); k++) {
                 const CTxOut &out = tx.vout[k];
+                LogPrintf("XXX %s: output %s\n", __func__, out.ToString());
 
                 if (out.scriptPubKey.IsPayToScriptHash()) {
+                    LogPrintf("XXX %s: IsPayToScriptHash\n", __func__);
                     std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+2, out.scriptPubKey.begin()+22);
 
                     // record receiving activity
@@ -2218,6 +2226,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(2, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
 
                 } else if (out.scriptPubKey.IsPayToPublicKeyHash()) {
+                    LogPrintf("XXX %s: IsPayToPublicKeyHash\n", __func__);
                     std::vector<unsigned char> hashBytes(out.scriptPubKey.begin()+3, out.scriptPubKey.begin()+23);
 
                     // record receiving activity
@@ -2227,6 +2236,7 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
                     addressUnspentIndex.push_back(std::make_pair(CAddressUnspentKey(1, uint160(hashBytes), txhash, k), CAddressUnspentValue(out.nValue, out.scriptPubKey, pindex->nHeight)));
 
                 } else {
+                    LogPrintf("XXX %s: continue\n", __func__, out.ToString());
                     continue;
                 }
 
