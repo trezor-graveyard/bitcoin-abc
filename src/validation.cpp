@@ -1645,7 +1645,8 @@ DisconnectResult ApplyTxInUndo(const CTxInUndo &undo, CCoinsViewCache &view,
  */
 static DisconnectResult DisconnectBlock(const CBlock &block,
                                         const CBlockIndex *pindex,
-                                        CCoinsViewCache &view) {
+                                        CCoinsViewCache &view,
+                                        bool fJustCheck = false) {
     assert(pindex->GetBlockHash() == view.GetBestBlock());
 
     CBlockUndo blockUndo;
@@ -1660,12 +1661,13 @@ static DisconnectResult DisconnectBlock(const CBlock &block,
         return DISCONNECT_FAILED;
     }
 
-    return ApplyBlockUndo(blockUndo, block, pindex, view);
+    return ApplyBlockUndo(blockUndo, block, pindex, view, fJustCheck);
 }
 
 DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
                                 const CBlock &block, const CBlockIndex *pindex,
-                                CCoinsViewCache &view) {
+                                CCoinsViewCache &view,
+                                bool fJustCheck) {
     bool fClean = true;
 
     if (blockUndo.vtxundo.size() + 1 != block.vtx.size()) {
@@ -1801,16 +1803,16 @@ DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
     //ApplyBlockUndo do not have the state parameter
     CValidationState state;
 
-    if (fAddressIndex) {
+    if (!fJustCheck && fAddressIndex) {
         if (!pblocktree->EraseAddressIndex(addressIndex)) {
             //return AbortNode(state, "Failed to delete address index");
             AbortNode(state, "Failed to delete address index");
-            return DISCONNECT_UNCLEAN;
+            fClean = false;
         }
         if (!pblocktree->UpdateAddressUnspentIndex(addressUnspentIndex)) {
             //return AbortNode(state, "Failed to write address unspent index");
             AbortNode(state, "Failed to write address unspent index");
-            return DISCONNECT_UNCLEAN;
+            fClean = false;
         }
     }
 
@@ -4447,7 +4449,9 @@ bool CVerifyDB::VerifyDB(const Config &config, const CChainParams &chainparams,
         if (nCheckLevel >= 3 && pindex == pindexState &&
             (coins.DynamicMemoryUsage() + pcoinsTip->DynamicMemoryUsage()) <=
                 nCoinCacheUsage) {
-            DisconnectResult res = DisconnectBlock(block, pindex, coins);
+            // just check, do not update the address index
+            DisconnectResult res = DisconnectBlock(block, pindex, coins, true);
+
             if (res == DISCONNECT_FAILED) {
                 return error("VerifyDB(): *** irrecoverable inconsistency in "
                              "block data at %d, hash=%s",
@@ -4493,8 +4497,9 @@ bool CVerifyDB::VerifyDB(const Config &config, const CChainParams &chainparams,
                     "VerifyDB(): *** ReadBlockFromDisk failed at %d, hash=%s",
                     pindex->nHeight, pindex->GetBlockHash().ToString());
             }
+            // just check, do not update the address index
             if (!ConnectBlock(config, block, state, pindex, coins,
-                              chainparams)) {
+                              chainparams, true)) {
                 return error(
                     "VerifyDB(): *** found unconnectable block at %d, hash=%s",
                     pindex->nHeight, pindex->GetBlockHash().ToString());

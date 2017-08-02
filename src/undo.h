@@ -108,6 +108,7 @@ DisconnectResult ApplyTxInUndo(const CTxInUndo &undo, CCoinsViewCache &view,
  */
 DisconnectResult ApplyBlockUndo(const CBlockUndo &blockUndo,
                                 const CBlock &block, const CBlockIndex *pindex,
-                                CCoinsViewCache &coins);
+                                CCoinsViewCache &coins,
+                                bool fJustCheck = false);
 
 #endif // BITCOIN_UNDO_H
