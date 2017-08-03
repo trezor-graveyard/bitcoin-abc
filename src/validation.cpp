@@ -2319,9 +2319,9 @@ static bool ConnectBlock(const Config &config, const CBlock &block,
         }
     }
 
-    if (fSpentIndex)
-        if (!pblocktree->UpdateSpentIndex(spentIndex))
-            return AbortNode(state, "Failed to write transaction index");
+    // if (fSpentIndex)
+    //     if (!pblocktree->UpdateSpentIndex(spentIndex))
+    //         return AbortNode(state, "Failed to write transaction index");
 
     if (fTimestampIndex) {
         unsigned int logicalTS = pindex->nTime;
