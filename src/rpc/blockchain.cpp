@@ -189,7 +189,7 @@ UniValue blockToDeltasJSON(const CBlock& block, const CBlockIndex* blockindex)
                 continue;
             }
 
-            delta.push_back(Pair("satoshis", out.nValue));
+            delta.push_back(Pair("satoshis", out.nValue.GetSatoshis()));
             delta.push_back(Pair("index", (int)k));
 
             outputs.push_back(delta);
