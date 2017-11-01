@@ -353,3 +353,8 @@ bool IsValidDestinationString(const std::string &str,
 bool IsValidDestinationString(const std::string &str) {
     return CBitcoinAddress(str).IsValid();
 }
+
+bool GetDestinationIndexKey(const std::string &dest, uint160& hashBytes, int& type) {
+    CBitcoinAddress addr(dest);
+    return addr.GetIndexKey(hashBytes, type);
+}
