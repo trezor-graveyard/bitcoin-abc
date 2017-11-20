@@ -1896,10 +1896,12 @@ bool AppInitMain(Config &config, boost::thread_group &threadGroup,
     // block tree db settings
     int dbMaxOpenFiles = GetArg("-dbmaxopenfiles", DEFAULT_DB_MAX_OPEN_FILES);
     bool dbCompression = GetBoolArg("-dbcompression", DEFAULT_DB_COMPRESSION);
+    size_t dbMaxFileSize = GetArg("-dbmaxfilesize", DEFAULT_DB_MAX_FILE_SIZE) << 20;
 
     LogPrintf("Block index database configuration:\n");
     LogPrintf("* Using %d max open files\n", dbMaxOpenFiles);
     LogPrintf("* Compression is %s\n", dbCompression ? "enabled" : "disabled");
+    LogPrintf("* Using %d MB files\n", (dbMaxFileSize / 1024 / 1024));
 
     // cache size calculations
     int64_t nTotalCache = (GetArg("-dbcache", nDefaultDbCache) << 20);
@@ -1953,7 +1955,7 @@ bool AppInitMain(Config &config, boost::thread_group &threadGroup,
                 delete pblocktree;
 
                 pblocktree =
-                    new CBlockTreeDB(nBlockTreeDBCache, false, fReindex, dbCompression, dbMaxOpenFiles);
+                    new CBlockTreeDB(nBlockTreeDBCache, false, fReindex, dbCompression, dbMaxOpenFiles, dbMaxFileSize);
                 pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false,
                                                 fReindex || fReindexChainState);
                 pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
